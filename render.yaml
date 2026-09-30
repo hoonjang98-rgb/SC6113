@@ -1,9 +1,9 @@
 services:
   - type: web
     runtime: static
-    name: pocketpay-sepolia
-    rootDir: pocketpay
-    buildCommand: echo "PocketPay static site is ready"
+    name: sc6113-simple-storage
+    rootDir: simple-storage
+    buildCommand: echo "SimpleStorage static site is ready"
     staticPublishPath: .
     headers:
       - path: /*
