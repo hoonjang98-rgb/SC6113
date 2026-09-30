@@ -1,0 +1,11 @@
+{
+  "name": "SimpleStorage — On-chain number vault",
+  "short_name": "SimpleStorage",
+  "description": "Store and read a number on Ethereum Sepolia.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f6ff",
+  "theme_color": "#f3f6ff",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
