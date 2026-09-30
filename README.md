@@ -1,9 +1,7 @@
-# PocketPay
+# SimpleStorage
 
-A mobile-friendly Ethereum dapp for sending test ETH on Sepolia.
+A mobile-friendly Ethereum dapp that reads and stores one unsigned integer on Sepolia.
 
-The app connects an injected wallet, checks its Sepolia balance, sends wallet-to-wallet transfers, and tracks transaction receipts. It supports opening inside a mobile wallet browser and installation as a home-screen app.
+Connect MetaMask, view the current on-chain value, refresh it, and submit a new value with a wallet-confirmed transaction. The app checks the network before writing and includes a responsive layout and installable PWA shell.
 
-PocketPay only sends on Sepolia. Test ETH has no real-world value. The app never requests a recovery phrase or private key.
-
-See the `pocketpay` directory for the app and the root `render.yaml` for the Render static-site Blueprint.
+The app uses contract `0xab32bd19c1a369b9a94aa7ff2bd0ef5a2518b76` on Sepolia (chain ID `11155111`). The root `render.yaml` deploys the static site from `simple-storage`.
