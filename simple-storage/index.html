@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f8fc">
+<meta name="description" content="Store and read a number on Ethereum Sepolia.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<title>SimpleStorage — On-chain number vault</title>
+<style>
+:root{--ink:#121b31;--muted:#687b99;--purple:#5145e8;--line:#e1e6f0;--bg:#f4f6fb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);background-image:url("/blue-background.png"),radial-gradient(ellipse at 10% 2%,#dce9ff 0,transparent 40%),linear-gradient(135deg,#f0f5ff,#f7f8fc);background-size:cover;background-position:center;background-attachment:fixed;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input{font:inherit}button,a{-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #928bff;outline-offset:3px}
+.topbar{height:104px;padding:0 clamp(22px,4vw,58px);display:flex;align-items:center;justify-content:space-between;gap:18px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:17px}
+.logo{width:57px;height:57px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(140deg,#7658f5,#a44de8);color:white;font-size:28px;font-weight:800;box-shadow:0 8px 18px #704dee35}
+.brand h1{margin:0;font-size:24px;letter-spacing:-.7px}
+.brand p{margin:1px 0 0;color:var(--muted);font-size:17px}
+.button{min-height:52px;padding:0 25px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:16px;background:var(--purple);color:white;font-size:16px;font-weight:750;cursor:pointer;box-shadow:0 9px 20px #5145e83a;transition:transform .15s ease,background .15s ease}
+.button:hover:not(:disabled){transform:translateY(-1px);background:#4539d6}
+.button:disabled{background:#d3d0f8;box-shadow:none;cursor:not-allowed}
+.button .button-dot{width:10px;height:10px;border-radius:50%;background:#9891ff;box-shadow:0 0 0 4px #ffffff24}
+main{width:min(1380px,calc(100% - 8vw));margin:48px auto 0}
+.banner{min-height:122px;padding:20px 30px;display:flex;align-items:center;gap:24px;border:1px solid #cbd2ff;border-radius:24px;background:linear-gradient(105deg,#f0f1ff,#f9f3ff)}
+.banner-icon{width:54px;flex:0 0 auto;text-align:center;font-size:30px}
+.banner-copy{min-width:0;flex:1}
+.banner-copy strong{display:block;margin-bottom:3px;font-size:19px}
+.banner-copy p{margin:0;color:var(--muted);font-size:18px;line-height:1.4}
+.banner .button{min-width:140px}
+.cards{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.card{min-height:306px;padding:34px 36px;border:1px solid var(--line);border-radius:24px;background:white;box-shadow:0 15px 34px #1c2b4a0c}
+.value-card{background:radial-gradient(ellipse at 100% 0,#f5eaff 0,transparent 48%),linear-gradient(135deg,#f1efff,#fff 75%)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.eyebrow{color:#5f7899;font-size:14px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.refresh{width:66px;height:66px;flex:0 0 auto;border:1px solid var(--line);border-radius:17px;background:#fff;color:#6e819e;font-size:27px;cursor:pointer}
+.refresh:hover{background:#f7f6ff;color:var(--purple)}
+.value{margin-top:26px;color:#5945ed;font-size:96px;font-weight:650;line-height:1;letter-spacing:-4px;overflow-wrap:anywhere}
+.wallet-required{padding:9px 15px;border-radius:24px;background:#f1f4f8;color:#607793;font-size:14px;font-weight:650;white-space:nowrap}
+.number-input{width:100%;height:84px;margin-top:29px;padding:0 24px;border:1px solid #e8edf4;border-radius:19px;background:#fbfcfe;color:var(--ink);font-size:31px;font-weight:600;outline:0}
+.number-input::placeholder{color:#b5bac2}
+.store{width:100%;height:69px;margin-top:17px;border-radius:19px;font-size:18px}
+.contract-panel{min-height:130px;margin:30px 0 42px;padding:25px 36px;display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:24px;border:1px solid var(--line);border-radius:24px;background:#fff}
+.meta-label{margin-bottom:9px;color:#5f7899;font-size:14px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.contract-address{color:#5546ed;font:600 17px ui-monospace,SFMono-Regular,Consolas,monospace;text-decoration:none;overflow-wrap:anywhere}
+.contract-address:hover{text-decoration:underline}
+.network-name{font-size:17px}.network-name span{color:var(--muted)}
+.status{margin:-20px 0 30px;padding:14px 17px;border:1px solid #d8defb;border-radius:13px;background:#f0f1ff;color:#4d4a91;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.status.error{border-color:#f0d4d8;background:#fff1f2;color:#a34251}
+[hidden]{display:none!important}
+@media(max-width:760px){.topbar{height:82px;padding:0 22px}.logo{width:46px;height:46px;border-radius:15px}.brand{gap:12px}.brand h1{font-size:19px}.brand p{font-size:13px}.topbar>.button{min-height:45px;padding:0 15px;font-size:13px}main{width:calc(100% - 32px);margin-top:25px}.banner{min-height:110px;padding:18px;gap:13px;border-radius:19px}.banner-icon{width:36px;font-size:25px}.banner-copy strong{font-size:15px}.banner-copy p{font-size:13px}.banner .button{min-width:92px;min-height:44px;padding:0 15px;font-size:14px}.cards{margin-top:18px;grid-template-columns:1fr;gap:16px}.card{min-height:250px;padding:25px;border-radius:20px}.eyebrow,.meta-label{font-size:11px}.refresh{width:52px;height:52px;border-radius:14px;font-size:22px}.value{margin-top:20px;font-size:76px}.wallet-required{padding:8px 11px;font-size:11px}.number-input{height:68px;margin-top:22px;padding:0 18px;font-size:25px}.store{height:57px;margin-top:13px;font-size:16px}.contract-panel{min-height:0;margin-top:16px;padding:21px 24px;grid-template-columns:1fr;gap:20px;border-radius:20px}.contract-address,.network-name{font-size:14px}.status{margin:14px 0 20px}}
+@media(max-width:420px){.topbar{padding:0 14px}.brand{gap:9px}.brand h1{font-size:17px}.brand p{font-size:12px}.logo{width:40px;height:40px;font-size:23px}.topbar>.button{min-height:41px;padding:0 12px;font-size:12px}.topbar .button-dot{width:8px;height:8px}.banner{align-items:flex-start;flex-wrap:wrap}.banner-icon{width:30px;padding-top:5px}.banner-copy{flex-basis:calc(100% - 48px)}.banner .button{margin-left:43px}.card{padding:21px}.card-head{gap:8px}.wallet-required{font-size:10px}.value{font-size:66px}.contract-panel{padding:19px}.contract-address{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="logo" aria-hidden="true">S</div><div><h1>SimpleStorage</h1><p>On-chain number vault</p></div></div>
+  <button id="topConnect" class="button" type="button"><span class="button-dot"></span><span id="topConnectText">Connect Wallet</span></button>
+</header>
+<main>
+  <section id="connectBanner" class="banner">
+    <div class="banner-icon" aria-hidden="true">🔐</div>
+    <div class="banner-copy"><strong id="bannerTitle">Connect your wallet to get started</strong><p id="bannerText">You need MetaMask on Sepolia to store a number on-chain.</p></div>
+    <button id="bannerButton" class="button" type="button">Connect</button>
+  </section>
+  <section class="cards" aria-label="Stored number and number entry">
+    <article class="card value-card">
+      <div class="card-head"><div class="eyebrow">Current stored value</div><button id="refreshButton" class="refresh" type="button" aria-label="Refresh stored value" title="Refresh stored value">↻</button></div>
+      <div id="storedValue" class="value" aria-live="polite">—</div>
+    </article>
+    <article class="card">
+      <div class="card-head"><div class="eyebrow">Store a new number</div><span id="walletBadge" class="wallet-required">🔒 Wallet required</span></div>
+      <form id="storeForm" novalidate>
+        <label class="visually-hidden" for="numberInput">Number to store</label>
+        <input id="numberInput" class="number-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="e.g. 42" autocomplete="off" disabled>
+        <button id="storeButton" class="button store" type="submit" disabled>Store Number</button>
+      </form>
+    </article>
+  </section>
+  <section class="contract-panel">
+    <div><div class="meta-label">Contract</div><a class="contract-address" href="https://sepolia.etherscan.io/address/0xab32bd19c1a369b9a94aa7ff2bd0ef5a2518b76" target="_blank" rel="noreferrer">0xab32bd19c1a369b9a94aa7ff2bd0ef5a2518b76</a></div>
+    <div><div class="meta-label">Network</div><div class="network-name">Sepolia <span>(chain ID 11155111)</span></div></div>
+  </section>
+  <section id="status" class="status" role="status" aria-live="polite" hidden></section>
+</main>
+<script>
+"use strict";
+const CONTRACT="0xab32bd19c1a369b9a94aa7ff2bd0ef5a2518b76";
+const SEPOLIA="0xaa36a7";
+const RPC="https://ethereum-sepolia-rpc.publicnode.com";
+const READ_DATA="0x2e64cec1";
+const STORE_SELECTOR="0x6057361d";
+const byId=id=>document.getElementById(id);
+const ui={top:byId("topConnect"),topText:byId("topConnectText"),banner:byId("connectBanner"),bannerTitle:byId("bannerTitle"),bannerText:byId("bannerText"),bannerButton:byId("bannerButton"),value:byId("storedValue"),refresh:byId("refreshButton"),badge:byId("walletBadge"),form:byId("storeForm"),input:byId("numberInput"),store:byId("storeButton"),status:byId("status")};
+let provider=null,account="",chain="";
+function isMobile(){return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)}
+function setStatus(message,error){ui.status.hidden=!message;ui.status.classList.toggle("error",Boolean(error));ui.status.textContent=message||""}
+function updateUi(){const connected=Boolean(account),onSepolia=chain===SEPOLIA;ui.topText.textContent=connected?account.slice(0,6)+"…"+account.slice(-4):"Connect Wallet";ui.banner.hidden=connected&&onSepolia;ui.bannerTitle.textContent=!connected?"Connect your wallet to get started":onSepolia?"Wallet connected":"Switch to Sepolia to get started";ui.bannerText.textContent=!connected?"You need MetaMask on Sepolia to store a number on-chain.":onSepolia?"Your wallet is connected to the Sepolia network.":"The connected wallet must use Sepolia (chain ID 11155111).";ui.bannerButton.textContent=connected&&!onSepolia?"Switch network":"Connect";ui.badge.textContent=connected&&onSepolia?"✓ Wallet connected":"🔒 Wallet required";ui.input.disabled=!connected||!onSepolia;ui.store.disabled=!connected||!onSepolia;ui.top.classList.toggle("connected",connected)}
+async function readWithProvider(){const result=await provider.request({method:"eth_call",params:[{to:CONTRACT,data:READ_DATA},"latest"]});return BigInt(result).toString()}
+async function readPublic(){const response=await fetch(RPC,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"eth_call",params:[{to:CONTRACT,data:READ_DATA},"latest"]})});if(!response.ok)throw Error("Could not reach the Sepolia network.");const result=await response.json();if(result.error)throw Error(result.error.message||"The storage contract could not be read.");return BigInt(result.result).toString()}
+async function refreshValue(showMessage){ui.refresh.disabled=true;ui.value.textContent="…";try{let value;if(provider&&chain===SEPOLIA)value=await readWithProvider();else value=await readPublic();ui.value.textContent=value;if(showMessage)setStatus("Stored value refreshed from the Sepolia contract.")}catch(error){ui.value.textContent="—";setStatus(error.message||"Could not read the stored value. Check the contract and Sepolia network.",true)}finally{ui.refresh.disabled=false}}
+async function connect(){if(!window.ethereum||typeof window.ethereum.request!=="function"){if(isMobile()){const url="https://metamask.app.link/dapp/"+location.host+location.pathname;ui.bannerText.textContent="Open the app in MetaMask's browser to connect your wallet.";ui.bannerButton.textContent="Open MetaMask";ui.bannerButton.onclick=()=>location.href=url;setStatus("On your phone, open this site in MetaMask's browser, then connect.")}else setStatus("MetaMask was not detected. Install the wallet extension, then reload this page.",true);return}provider=window.ethereum;try{const accounts=await provider.request({method:"eth_requestAccounts"});account=accounts&&accounts[0]||"";chain=String(await provider.request({method:"eth_chainId"})).toLowerCase();ui.bannerButton.onclick=null;updateUi();if(chain===SEPOLIA){setStatus("Wallet connected to Sepolia.");await refreshValue(false)}else setStatus("Wallet connected. Switch to Sepolia before storing a number.",true)}catch(error){setStatus(error&&error.code===4001?"Wallet connection was cancelled.":error.message||"Could not connect wallet.",true)}}
+async function switchNetwork(){if(!provider)return connect();try{await provider.request({method:"wallet_switchEthereumChain",params:[{chainId:SEPOLIA}]})}catch(error){if(error&&error.code===4902){try{await provider.request({method:"wallet_addEthereumChain",params:[{chainId:SEPOLIA,chainName:"Sepolia",nativeCurrency:{name:"Sepolia Ether",symbol:"ETH",decimals:18},rpcUrls:[RPC],blockExplorerUrls:["https://sepolia.etherscan.io"]}]})}catch(addError){setStatus(addError.message||"Could not add Sepolia to the wallet.",true);return}}else{setStatus(error.message||"Could not switch to Sepolia.",true);return}}chain=String(await provider.request({method:"eth_chainId"})).toLowerCase();updateUi();if(chain===SEPOLIA){setStatus("Connected to Sepolia.");await refreshValue(false)}}
+async function storeNumber(event){event.preventDefault();if(!account||chain!==SEPOLIA)return connect();const text=ui.input.value.trim();if(!/^\d+$/.test(text)){setStatus("Enter a whole number using digits only.",true);return}let number;try{number=BigInt(text)}catch(error){setStatus("Enter a valid whole number.",true);return}if(number<0n||number>=(1n<<256n)){setStatus("The number must fit in a 256-bit unsigned integer.",true);return}const data=STORE_SELECTOR+number.toString(16).padStart(64,"0");ui.store.disabled=true;ui.store.textContent="Confirm in wallet…";try{setStatus("Review the number and transaction in MetaMask.");const hash=await provider.request({method:"eth_sendTransaction",params:[{from:account,to:CONTRACT,data:data}]});setStatus("Transaction submitted. Waiting for Sepolia confirmation. Transaction: "+hash);for(let i=0;i<60;i++){await new Promise(resolve=>setTimeout(resolve,2500));const receipt=await provider.request({method:"eth_getTransactionReceipt",params:[hash]});if(!receipt)continue;if(receipt.status==="0x1"){setStatus("Number stored on Sepolia. Transaction: "+hash);ui.input.value="";await refreshValue(false)}else setStatus("The transaction failed on Sepolia. Transaction: "+hash,true);break}}catch(error){setStatus(error&&error.code===4001?"Transaction was cancelled in MetaMask.":error.message||"Could not store the number.",true)}finally{ui.store.textContent="Store Number";updateUi()}}
+ui.top.addEventListener("click",connect);ui.bannerButton.addEventListener("click",()=>account&&chain!==SEPOLIA?switchNetwork():connect());ui.refresh.addEventListener("click",()=>refreshValue(true));ui.form.addEventListener("submit",storeNumber);
+if(window.ethereum&&typeof window.ethereum.request==="function"){provider=window.ethereum;provider.request({method:"eth_accounts"}).then(async accounts=>{account=accounts&&accounts[0]||"";chain=String(await provider.request({method:"eth_chainId"})).toLowerCase();updateUi();if(account&&chain===SEPOLIA)await refreshValue(false)}).catch(()=>{});if(provider.on){provider.on("accountsChanged",accounts=>{account=accounts&&accounts[0]||"";updateUi();if(account&&chain===SEPOLIA)refreshValue(false)});provider.on("chainChanged",next=>{chain=String(next).toLowerCase();updateUi();if(chain===SEPOLIA)refreshValue(false)});provider.on("disconnect",()=>{account="";chain="";updateUi()})}}
+updateUi();refreshValue(false);if("serviceWorker"in navigator&&location.protocol.indexOf("http")===0)window.addEventListener("load",()=>navigator.serviceWorker.register("/service-worker.js").catch(()=>{}));
+</script>
+</body>
+</html>
